@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucked</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
+    <style>
+        .deadline-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        #newgoaltime:disabled {
+            background-color: #e0e0e0; /* leicht ausgegraut */
+            color: #777;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="standard">
+        <nav class="menu menu1">
+            <input type='checkbox' onclick='updatemenu()'><label></label>
+            <ul>
+                <li><a href='aahome.html'>🏚</a></li>
+                <li class="bucked2">Bucked</li>
+                <li><a href='profile.html'><img class="picture" src="profilepicture.png"></a></li>
+            </ul>
+        </nav>
+
+
+        <div class="padding" id="content">
+
+            <div class="choosecategory">
+                <button class="button4" id="leftbtn" onclick="leftbtn()"><</button>
+                <div id="categoryOutput"></div>
+                <button class="button4" id="rightbtn" onclick="rightbtn()">></button>
+            </div>
+            <div class="newgoal">
+                <input type="text" placeholder="Goal Title..." id="newgoaltitle" maxlength="16" >
+            </div>
+            max. length 16 Characters
+
+                <div id="button-group" >
+                    <button class="toggle-btn2 active"> Public</button>
+                    <button class="toggle-btn2">Private</button>
+                </div>
+
+                <!-- Deadline-Bereich -->
+                <div>
+                    <div class="deadline-wrapper">
+                        <span class="text" style="display: inline;">Add a Deadline?</span>
+                        <input type="checkbox" id="deadline" onclick="toggleDeadline()">
+                    </div>
+                    <input type="datetime-local" id="newgoaltime" class="newgoaltitle" disabled>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 50px;"><span>Invite a friend</span><a href="invitefriend.html" style="text-decoration: none; color: white; font-size: 30px; font-family:Arial, Helvetica, sans-serif;">+</a></div>
+                
+                
+                
+        </div>
+
+
+        <nav class="menu menu2">
+            <input type='checkbox' id='responsive-menu' onclick='updatemenu(), stats(), updatestats() '><label></label>
+            <ul>
+                <li><a href='owngoals.html'>📝</a></li>
+                <li><button class="button2" style="align-self: center; border-width: 3px; background-color: rgb(186, 189, 186); border-color: rgb(52, 102, 54); color: rgb(34, 34, 34); font-weight: 900; " onclick="saveInput()">Create Goal</button> <!--Button zum speichern des Ziels--></li>
+                <li><a href='discover.html'>🔎</a></li>
+            </ul>
+        </nav>
+
+    </div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+import { deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDahPBRsjOGgalkR3raXagtKytGn9n1SdE",
+  authDomain: "bucked.firebaseapp.com",
+  projectId: "bucked",
+  storageBucket: "bucked.firebasestorage.app",
+  messagingSenderId: "83783824498",
+  appId: "1:83783824498:web:da41e3e5dfbe131441beeb",
+  measurementId: "G-F3VYK204YW"
+};
+
+// Firebase initialisieren
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const analytics = getAnalytics(app);
+
+window.auth = auth;
+window.db = db;
+
+
+async function initStats() {
+  const statsRef = doc(db, "stats", "basis");
+  const statsSnap = await getDoc(statsRef);
+
+  if (!statsSnap.exists()) {
+    await setDoc(statsRef, {
+      totalGoals: 0,
+      publicGoals: 0,
+      privateGoals: 0,
+      completedGoals: 0,
+      deletedGoals: 0,
+      pendingGoals: 0,
+      avgCompletionTime: 0
+    });
+    console.log("Stats erstellt");
+  } else {
+    console.log("Stats existieren schon");
+  }
+}
+
+// --- Kategorie-Setup ---
+const categories = ["Sport🏀", "Study📖", "Hobby🎮", "Health🥼", "Finance💰", "Travel✈️", "Art🎨", "Social🤝", "Other❓"];
+let categoryIndex = 0;
+const categoryOutput = document.getElementById("categoryOutput");
+function updateCategory() { categoryOutput.textContent = categories[categoryIndex]; }
+window.leftbtn = () => { categoryIndex = (categoryIndex - 1 + categories.length) % categories.length; updateCategory(); }
+window.rightbtn = () => { categoryIndex = (categoryIndex + 1) % categories.length; updateCategory(); }
+updateCategory();
+
+// --- Public/Private Toggle ---
+const toggleButtons = document.querySelectorAll('.toggle-btn2');
+let isPublic = true;
+toggleButtons.forEach(btn => {
+  btn.addEventListener('click', function() {
+    toggleButtons.forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    isPublic = this.textContent.trim() === "Public";
+  });
+});
+
+// --- Deadline Toggle ---
+const deadlineCheckbox = document.getElementById("deadline");
+const newGoalTime = document.getElementById("newgoaltime");
+window.toggleDeadline = () => { newGoalTime.disabled = !deadlineCheckbox.checked; }
+
+// --- Username speichern / laden ---
+async function saveUsername(username){
+  const user = auth.currentUser;
+  if(!user) return;
+  await setDoc(doc(db, "users", user.uid), { username }, { merge: true });
+}
+
+async function loadUsername(){
+  const user = auth.currentUser;
+  if(!user) return "User2000";
+  const docSnap = await getDoc(doc(db, "users", user.uid));
+  return docSnap.exists() ? docSnap.data().username : "User2000";
+}
+
+// --- Goal speichern ---
+window.saveInput = async function() {
+  const title = document.getElementById("newgoaltitle").value.trim();
+  const category = categories[categoryIndex];
+  const user = auth.currentUser;
+  if (!user) { alert("You must be logged in!"); return; }
+  if (!title) { alert("Please enter a goal title!"); return; }
+
+  const goalData = { uid: user.uid, title, category, public: isPublic, createdAt: new Date() };
+  if (deadlineCheckbox.checked && newGoalTime.value) { 
+    goalData.deadline = new Date(newGoalTime.value); 
+  }
+
+  try {
+    const docRef = await addDoc(collection(db, "goals"), goalData);
+
+    // --- Direkt Box erstellen mit der passenden Farbe ---
+    const recentDiv = document.getElementById("recentactivity"); // optional, falls du direkt zur Übersicht willst
+    if (recentDiv) {
+      const box = document.createElement("div");
+      box.classList.add("goal-box");
+      if (isPublic) {
+        box.classList.add("goal-public");  // grün oder normale Farbe
+      } else {
+        box.classList.add("goal-private"); // grau
+      }
+      box.textContent = `${category} : ${title}`;
+      recentDiv.appendChild(box);
+    }
+
+    window.location.href = "owngoals.html"; // danach auf Übersicht
+  } catch (err) {
+    console.error(err);
+    alert("Error saving goal: " + err.message);
+  }
+
+
+  //stats updaten
+  async function updatestats() {
+    const statsRef = doc(db, "stats", user.uid);
+  await updateDoc(statsRef, {
+    totalGoals: increment(1),
+    publicGoals: isPublic ? increment(1) : increment(0),
+    privateGoals: !isPublic ? increment(1) : increment(0),
+    pendingGoals: increment(1)
+  });}
+
+
+updatestats();
+}
+
+// --- Auth Check ---
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "../pre/login.html";
+  }
+});
+</script>
+
+
+
+
+
+
+
+
+</body>
+</html>

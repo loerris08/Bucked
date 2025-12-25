@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucked</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
+    <link rel="icon" type="image/png" href="BuckedtextLogo.png">
+</head>
+
+<body>
+    <div class="standard">
+        <nav class="menu menu1">
+            <input type='checkbox' onclick='updatemenu()'><label></label>
+            <ul>
+                <li><a href='settings.html'>⚙</a></li>
+                <li class="bucked2">Bucked</li>
+                <li><a href='profile.html'><img class="picture" src="profilepicture.png"></strong></a></li>
+            </ul>
+        </nav>
+        <div style="color: transparent;">.</div>
+        <div style="display: flex; justify-content: center;">Complete Goals to reach a higher Level</div>
+<div class="level-container">
+    <span id="level-left">1</span>
+    <input type="range" min="0" max="100" value="0" disabled id="progress">
+    <span id="level-right">2</span>
+</div>
+
+        <div id="recentactivity" style="display: flex !important; justify-content: center !important; align-items: center !important;">
+            <span style="text-align: center;">No recent Activities, Goals or Messages yet. Get started to get some</span>
+        </div>
+
+        <nav class="menu menu2">
+            <input type='checkbox' id='responsive-menu' onclick='updatemenu()'><label></label>
+            <ul>
+                <li><a href='owngoals.html'>📝</a></li>
+                <li><a href='addgoal.html' style="font-size: 95px;">+</a></li>
+                <li><a href='discover.html'>🔎</a></li>
+            </ul>
+        </nav>
+
+    </div>
+
+    <script type="module">
+        // --- Firebase Setup ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            getDocs,
+            query,
+            where,
+            deleteDoc,
+            doc,
+            setDoc,
+            getDoc,
+            updateDoc,
+            increment
+        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+
+        // --- Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDahPBRsjOGgalkR3raXagtKytGn9n1SdE",
+            authDomain: "bucked.firebaseapp.com",
+            projectId: "bucked",
+            storageBucket: "bucked.firebasestorage.app",
+            messagingSenderId: "83783824498",
+            appId: "1:83783824498:web:da41e3e5dfbe131441beeb",
+            measurementId: "G-F3VYK204YW"
+        };
+
+        // --- Initialize ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+// --- Slider Hintergrund ---
+const slider = document.getElementById("progress");
+
+function updateSliderBackground() {
+    const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+    slider.style.backgroundImage = `linear-gradient(to right, #7b2e9c ${value}%, lightgray ${value}%)`;
+}
+
+// Initial setzen
+slider.value = 0;
+updateSliderBackground();
+
+// --- Level-Anzeige updaten ---
+function updateLevelDisplay(level) {
+    const left = document.getElementById("level-left");
+    const right = document.getElementById("level-right");
+    if (left && right) {
+        left.textContent = level;
+        right.textContent = level + 1;
+    }
+}
+// --- XP-Level aus Firestore laden ---
+async function loadXPLevel() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const slider = document.getElementById("progress");
+    
+    // DIREKT auf das User-Dokument zugreifen (user.uid als Document-ID)
+    const userStatsRef = doc(db, "stats", user.uid);
+    const docSnap = await getDoc(userStatsRef);
+
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        let xpValue = data.xplevel ?? 0;
+        let currentLevel = data.level ?? 1;
+        
+        // XP-Overflow/Underflow prüfen und Level anpassen
+        const { level, xp } = await checkAndUpdateLevel(xpValue, currentLevel, userStatsRef);
+        
+        // Slider und Level-Anzeige aktualisieren
+        slider.value = xp;
+        updateSliderBackground();
+        updateLevelDisplay(level);
+        
+        console.log("✅ XP-Level geladen:", xp, "Level:", level);
+    } else {
+        console.log("⚠️ Kein XP-Level gefunden – neues erstellt");
+        await setDoc(userStatsRef, { 
+            uid: user.uid, 
+            xplevel: 0,
+            level: 1
+        });
+        slider.value = 0;
+        updateSliderBackground();
+        updateLevelDisplay(1);
+    }
+}
+
+// --- Level-System mit Overflow/Underflow ---
+async function checkAndUpdateLevel(xp, currentLevel, statsRef) {
+    let newXP = xp;
+    let newLevel = currentLevel;
+    let needsUpdate = false;
+
+    // XP > 100 → Level UP
+    while (newXP > 100) {
+        newXP -= 100;
+        newLevel += 1;
+        needsUpdate = true;
+        console.log("🎉 Level UP! Neues Level:", newLevel);
+    }
+
+    // XP < 0 → Level DOWN (aber nicht unter Level 1)
+    while (newXP < 0 && newLevel > 1) {
+        newXP += 100;
+        newLevel -= 1;
+        needsUpdate = true;
+        console.log("📉 Level DOWN! Neues Level:", newLevel);
+    }
+
+    // Falls Level 1 und XP < 0 → auf 0 setzen
+    if (newLevel === 1 && newXP < 0) {
+        newXP = 0;
+        needsUpdate = true;
+    }
+
+    // In Firestore speichern, falls sich was geändert hat
+    if (needsUpdate) {
+        await updateDoc(statsRef, {
+            xplevel: newXP,
+            level: newLevel
+        });
+    }
+
+    return { level: newLevel, xp: newXP };
+}
+
+// Optional: Periodisch aktualisieren (alle 5 Sekunden)
+setInterval(async () => {
+    if (auth.currentUser) {
+        await loadXPLevel();
+    }
+}, 5000);
+
+
+async function updateXPLevel(amount) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userStatsRef = doc(db, "stats", user.uid);
+
+  const docSnap = await getDoc(userStatsRef);
+  if (!docSnap.exists()) {
+    await setDoc(userStatsRef, { uid: user.uid, xplevel: amount, level: 1 });
+    return;
+  }
+
+  const data = docSnap.data();
+  const newXP = (data.xplevel ?? 0) + amount;
+  const currentLevel = data.level ?? 1;
+
+  // --- Hier direkt Level-Logik prüfen ---
+  const { level, xp } = await checkAndUpdateLevel(newXP, currentLevel, userStatsRef);
+
+  // --- UI aktualisieren ---
+  const slider = document.getElementById("progress");
+  slider.value = xp;
+  updateSliderBackground();
+  updateLevelDisplay(level);
+}
+
+
+        // --- Username speichern & laden ---
+        async function saveUsername(username) {
+            const user = auth.currentUser;
+            if (!user) return;
+            await setDoc(doc(db, "users", user.uid), { username: username }, { merge: true });
+        }
+
+        async function loadUsername() {
+            const user = auth.currentUser;
+            if (!user) return "User2000";
+            const docSnap = await getDoc(doc(db, "users", user.uid));
+            return docSnap.exists() ? docSnap.data().username : "User2000";
+        }
+
+        // --- Auth Check ---
+        onAuthStateChanged(auth, async user => {
+            if (!user) {
+                window.location.href = "../pre/login.html";
+            } else {
+                const username = await loadUsername();
+                const usernameDisplay = document.getElementById("usernameDisplay");
+                const input = document.querySelector("input");
+
+                if (usernameDisplay) usernameDisplay.textContent = username;
+                if (input) input.placeholder = username;
+
+                // ✅ XP-Level hier laden (nach Login)
+                await loadXPLevel();
+            }
+        });
+
+        // --- Recent Activity ---
+        let recentactivity = 0;
+        function showrecentactivity() {
+            const recentDiv = document.getElementById("recentactivity");
+            if (!recentDiv) return;
+            recentDiv.style.display = recentactivity === 0 ? "flex" : "none";
+        }
+        setInterval(showrecentactivity, 1000);
+
+        // --- Export (optional für andere Seiten) ---
+        window.auth = auth;
+        window.db = db;
+        window.analytics = analytics;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.where = where;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+
+        
+    </script>
+
+</body>
+</html>

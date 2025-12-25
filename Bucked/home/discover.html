@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bucked</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style2.css">
+</head>
+
+<body>
+  <div class="standard">
+    <nav class="menu menu1">
+      <input type='checkbox' onclick='updatemenu()'><label></label>
+      <ul>
+        <li><a href='aahome.html'>🏚</a></li>
+        <li class="bucked2">Bucked</li>
+        <li><a href='profile.html'><img class="picture" src="profilepicture.png"></a></li>
+      </ul>
+    </nav>
+
+
+
+    <div id="recentactivity" style="display: flex; justify-content: center; align-items: center; text-align: center;">
+      <div>
+        This area is not ready yet.<br>Come back soon
+      </div>
+    </div>
+
+
+
+    <nav class="menu menu2">
+      <input type='checkbox' id='responsive-menu' onclick='updatemenu()'><label></label>
+      <ul>
+        <li><a href='owngoals.html'>📝</a></li>
+        <li><a href='addgoal.html' style="font-size: 95px;">+</a></li>
+        <li><a href='discover.html'>🔎</a></li>
+      </ul>
+    </nav>
+
+  </div>
+
+
+
+
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+
+
+
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    // Username speichern
+    async function saveUsername(username) {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      await setDoc(doc(db, "users", user.uid), { username: username }, { merge: true });
+    }
+
+    // Username laden
+    async function loadUsername() {
+      const user = auth.currentUser;
+      if (!user) return "User2000";
+
+      const docSnap = await getDoc(doc(db, "users", user.uid));
+      if (docSnap.exists()) {
+        return docSnap.data().username;
+      }
+      return "User2000";
+    }
+
+
+
+    // Firebase-Konfiguration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDahPBRsjOGgalkR3raXagtKytGn9n1SdE",
+      authDomain: "bucked.firebaseapp.com",
+      projectId: "bucked",
+      storageBucket: "bucked.firebasestorage.app",
+      messagingSenderId: "83783824498",
+      appId: "1:83783824498:web:da41e3e5dfbe131441beeb",
+      measurementId: "G-F3VYK204YW"
+    };
+
+    // Firebase initialisieren
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
+
+    // Export für andere Skripte
+    window.auth = auth;
+    window.db = db;
+    window.analytics = analytics;
+
+    // Container, wo die Goals angezeigt werden
+    const recentDiv = document.getElementById("recentactivity");
+
+    // Funktion, um öffentliche Goals zu laden
+    async function loadPublicGoals() {
+      recentDiv.innerHTML = "Loading...";
+
+      try {
+        const goalsRef = collection(db, "goals");
+        const q = query(goalsRef, where("visibility", "==", "Public")); // öffentliche Ziele
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          recentDiv.textContent = "No public goals yet. Come back soon!";
+          return;
+        }
+
+        recentDiv.innerHTML = "";
+        querySnapshot.forEach(docSnap => {
+          const goal = docSnap.data();
+          const box = document.createElement("div");
+          box.classList.add("goal-box");
+
+          const text = document.createElement("span");
+          text.textContent = `${goal.category} : ${goal.title}`;
+
+          box.appendChild(text);
+          recentDiv.appendChild(box);
+        });
+      } catch (err) {
+        recentDiv.textContent = "Error loading goals.";
+        console.error(err);
+      }
+    }
+
+    // Prüfen, ob Benutzer eingeloggt ist, optional
+    onAuthStateChanged(auth, user => {
+      // Hier kann man z.B. anzeigen, dass der User eingeloggt ist
+      loadPublicGoals();
+    });
+    // --- Auth Check + Initial Username anzeigen ---
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "../pre/login.html"; // Pfad prüfen
+      } else {
+        const username = await loadUsername();
+        if (usernameDisplay) usernameDisplay.textContent = username;
+        if (input) input.placeholder = username;
+      }
+    });
+  </script>
+
+
+</body>
+
+
+
+
+</html>

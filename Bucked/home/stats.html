@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bucked</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
+    <style>
+        .deadline-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        #newgoaltime:disabled {
+            background-color: #e0e0e0;
+            /* leicht ausgegraut */
+            color: #777;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="standard">
+        <nav class="menu menu1">
+            <input type='checkbox' onclick='updatemenu()'><label></label>
+            <ul>
+                <li><a href='aahome.html'>🏚</a></li>
+                <li class="bucked2">Bucked</li>
+                <li><a href='profile.html'>👤</a></li>
+            </ul>
+        </nav>
+
+
+        <div class="padding" id="content" style="padding-left: 10px;">
+            <h2 style="text-align: center; margin-top: 20px;">Your Statistics</h2>
+            <div id="statsContainer" style="margin-top: 20px; ">
+
+                <!-- Basiswerte -->
+                <h3>Overall🏁</h2>
+                    <p>Total Goals Created: <span id="totalGoals">0</span></p>
+                    <p>Pending public Goals: <span id="publicGoals">0</span></p>
+                    <p>Pending private Goals: <span id="privateGoals">0</span></p>
+                    <p>Completed Goals: <span id="completedGoals">0</span></p>
+                    <p>Deleted Goals: <span id="deletedGoals">0</span></p>
+                    <p>Pending Goals: <span id="pendingGoals">0</span></p>
+                    <p>Average Completion Time: <span id="avgCompletionTime">N/A</span></p>
+
+                    <hr>
+
+                    <!-- Fortschritt / Nutzung -->
+                    <h3>📈 Progress</h3>
+                    <p>Goals per Category: <span id="goalsPerCategory">N/A</span></p>
+                    <p>Most Used Category: <span id="mostUsedCategory">N/A</span></p>
+                    <p>Longest Streak: <span id="longestStreak">0 days</span></p>
+                    <p>Current Streak: <span id="currentStreak">0 days</span></p>
+                    <p>Weekly Goals Created: <span id="weeklyCreated">0</span></p>
+                    <p>Weekly Goals Completed: <span id="weeklyCompleted">0</span></p>
+
+                    <hr>
+
+                    <!-- Qualität -->
+                    <h3>✨ Quality</h3>
+                    <p>Average Goal Title Length: <span id="avgGoalLength">0 chars</span></p>
+                    <p>Goals with Deadline: <span id="goalsWithDeadline">0</span></p>
+                    <p>Overdue Goals: <span id="overdueGoals">0</span></p>
+                    <p>Completed Before Deadline: <span id="completedOnTime">0</span></p>
+
+                    <hr>
+
+                    <!-- Effizienz -->
+                    <h3>⚡ Efficiency</h3>
+                    <p>Fastest Completion: <span id="fastestCompletion">N/A</span></p>
+                    <p>Slowest Completion: <span id="slowestCompletion">N/A</span></p>
+                    <p>Median Completion Time: <span id="medianCompletionTime">N/A</span></p>
+
+                    <hr>
+
+                    <!-- Community -->
+                    <h3>🌍 Community</h3>
+                    <p>Public vs Private Ratio: <span id="publicPrivateRatio">0%</span></p>
+                    <p>Friends’ Average Goals: <span id="friendsAverageGoals">N/A</span></p>
+                    <p>Global Rank: <span id="globalRank">N/A</span></p>
+            </div>
+            <div id="chartContainer" style="margin-top: 30px;">
+                <canvas id="goalsChart" width="400" height="200"></canvas>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script type="module" src="stats.js"></script>
+        </div>
+
+
+        <nav class="menu menu2">
+            <input type='checkbox' id='responsive-menu' onclick='updatemenu()'><label></label>
+            <ul>
+                <li><a href='owngoals.html'>📝</a></li>
+                <li><a href='addgoal.html' style="font-size: 95px;">+</a></li>
+                <li><a href='discover.html'>🔎</a></li>
+            </ul>
+        </nav>
+
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+        import { deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDahPBRsjOGgalkR3raXagtKytGn9n1SdE",
+            authDomain: "bucked.firebaseapp.com",
+            projectId: "bucked",
+            storageBucket: "bucked.firebasestorage.app",
+            messagingSenderId: "83783824498",
+            appId: "1:83783824498:web:da41e3e5dfbe131441beeb",
+            measurementId: "G-F3VYK204YW"
+        };
+
+        // Firebase initialisieren
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        window.auth = auth;
+        window.db = db;
+
+
+        // --- Username speichern / laden ---
+        async function saveUsername(username) {
+            const user = auth.currentUser;
+            if (!user) return;
+            await setDoc(doc(db, "users", user.uid), { username }, { merge: true });
+        }
+
+        async function loadUsername() {
+            const user = auth.currentUser;
+            if (!user) return "User2000";
+            const docSnap = await getDoc(doc(db, "users", user.uid));
+            return docSnap.exists() ? docSnap.data().username : "User2000";
+        }
+
+
+        // --- Auth Check ---
+        onAuthStateChanged(auth, user => {
+            if (!user) {
+                window.location.href = "../pre/login.html";
+            }
+        });
+
+// Stats laden - NUR für den aktuellen User
+async function getstats() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // User-spezifisches Stats-Dokument laden (user.uid als Document-ID)
+    const statsRef = doc(db, "stats", user.uid);
+    const docSnap = await getDoc(statsRef);
+
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        // Basiswerte
+        document.getElementById("totalGoals").textContent = data.totalGoals ?? 0;
+        document.getElementById("publicGoals").textContent = data.publicGoals ?? 0;
+        document.getElementById("privateGoals").textContent = data.privateGoals ?? 0;
+        document.getElementById("completedGoals").textContent = data.completedGoals ?? 0;
+        document.getElementById("deletedGoals").textContent = data.deletedGoals ?? 0;
+        document.getElementById("pendingGoals").textContent = data.pendingGoals ?? 0;
+        document.getElementById("avgCompletionTime").textContent = data.avgCompletionTime ?? "N/A";
+
+        // Progress
+        document.getElementById("goalsPerCategory").textContent = data.goalsPerCategory ?? "N/A";
+        document.getElementById("mostUsedCategory").textContent = data.mostUsedCategory ?? "N/A";
+        document.getElementById("longestStreak").textContent = data.longestStreak ? `${data.longestStreak} days` : "0 days";
+        document.getElementById("currentStreak").textContent = data.currentStreak ? `${data.currentStreak} days` : "0 days";
+        document.getElementById("weeklyCreated").textContent = data.weeklyCreated ?? 0;
+        document.getElementById("weeklyCompleted").textContent = data.weeklyCompleted ?? 0;
+
+        // Quality
+        document.getElementById("avgGoalLength").textContent = data.avgGoalLength ? `${data.avgGoalLength} chars` : "0 chars";
+        document.getElementById("goalsWithDeadline").textContent = data.goalsWithDeadline ?? 0;
+        document.getElementById("overdueGoals").textContent = data.overdueGoals ?? 0;
+        document.getElementById("completedOnTime").textContent = data.completedOnTime ?? 0;
+
+        // Efficiency
+        document.getElementById("fastestCompletion").textContent = data.fastestCompletion ?? "N/A";
+        document.getElementById("slowestCompletion").textContent = data.slowestCompletion ?? "N/A";
+        document.getElementById("medianCompletionTime").textContent = data.medianCompletionTime ?? "N/A";
+
+        // Community
+        document.getElementById("publicPrivateRatio").textContent = data.publicPrivateRatio ?? "0%";
+        document.getElementById("friendsAverageGoals").textContent = data.friendsAverageGoals ?? "N/A";
+        document.getElementById("globalRank").textContent = data.globalRank ?? "N/A";
+    } else {
+        // Dokument existiert nicht → Initialisieren mit 0-Werten
+        console.log("⚠️ Keine Stats gefunden – initialisiere neues Dokument");
+        await setDoc(statsRef, {
+            uid: user.uid,
+            xplevel: 0,
+            totalGoals: 0,
+            publicGoals: 0,
+            privateGoals: 0,
+            completedGoals: 0,
+            deletedGoals: 0,
+            pendingGoals: 0
+        });
+        
+        // Nochmal laden nach Initialisierung
+        await getstats();
+    }
+}
+
+onAuthStateChanged(auth, user => {
+    if (!user) {
+        window.location.href = "../pre/login.html";
+    } else {
+        getstats(); // erst laden, wenn eingeloggt
+    }
+});
+
+    </script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,516 @@
+.form {
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 32px;
+    border: 2px solid rgb(49, 55, 114);
+    border-radius: 16px;
+    background-color: rgba(230, 230, 230, 0.753);
+    box-shadow: 0px 0px 24px 7px rgb(52, 71, 53);
+    box-sizing: border-box;
+    margin: 0%;
+    font-family: lucida handwriting, cursive;
+    background: #a5da95;
+    background: radial-gradient(circle, rgb(90, 155, 70) 0%, rgb(178, 216, 173) 100%);
+    min-height: 720px;
+    min-width: 400px;
+}
+
+.button_login {
+    box-shadow: 2px -1px 11px 0px #2f6620;
+    background: linear-gradient(to bottom, #568f5e 5%, #597a47 100%);
+    background-color: #568f5e;
+    border-radius: 42px;
+    border: 2px solid #2f7a37;
+    display: inline-block;
+    cursor: pointer;
+    color: #f7f7f7;
+    font-family: lucida handwriting, cursive;
+    font-size: 24px;
+    padding: 11px 40px;
+    text-decoration: none;
+    text-shadow: 0px 0px 3px #c5c7c5;
+}
+
+.button_login:hover {
+    background: linear-gradient(to bottom, #597a47 5%, #568f5e 100%);
+    background-color: #597a47;
+}
+
+.button_login:active {
+    position: relative;
+    top: 1px;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: #08600E;
+    background: linear-gradient(225deg, rgb(6, 71, 11) 0%, rgba(40, 114, 45, 0.9) 50%, rgba(43, 97, 55, 1) 100%);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+    background-color: rgb(248, 248, 248);
+    font-family: Trebuchet MS;
+    border-radius: 30px;
+    font-family: lucida handwriting, cursive;
+}
+
+input:focus {
+    border-color: #25632a;
+}
+
+h2 {
+    font-size: 50px;
+    background: -webkit--gradient(#eee, #333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #3f5739;
+    font-family: lucida handwriting, cursive;
+}
+
+.bucked {
+    background: #08600E;
+    background: linear-gradient(to right, #08600E 0%, #34BD25 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Gradient-Text für Überschriften, kopierfertig und browserfreundlich */
+    font-family: lucida handwriting, cursive;
+}
+
+.logintext {
+    font-size: 20px;
+    color: #333;
+    font-family: lucida handwriting, cursive;
+}
+
+.fontfamily {
+    font-family: lucida handwriting, cursive;
+}
+
+select {
+    border-radius: 20px;
+}
+
+/*profile.html*/
+.checkbox {
+    display: none;
+}
+
+@media (max-width: 500px) {
+    .form {
+        max-width: 98vw;
+        padding: 8px;
+    }
+
+    .button_login {
+        font-size: 18px;
+        padding: 10px 10px;
+    }
+
+    input {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+.toggle-btn.active {
+    background-color: #568f5e;
+    color: #e9e9e9;
+    border: 1px solid #d15c5caf;
+    box-shadow: 0 0 12px 2px #356130, 0 0 4px 1px #0d4b11 inset;
+    transition: box-shadow 0.2s, background 0.2s;
+    font-family: lucida handwriting, cursive;
+}
+
+.toggle-btn {
+    background-color: #525352;
+    border-radius: 42px;
+    border: 1px solid #18ab29;
+    display: inline-block;
+    cursor: pointer;
+    color: #e9e9e9;
+    font-size: 16px;
+    padding: 16px 19px;
+    text-decoration: none;
+    font-family: lucida handwriting, cursive;
+}
+
+.toggle-btn:hover {
+    background-color: #203d1198;
+}
+
+#button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: space-evenly;
+}
+
+.backarrow {
+    font-size: 40px;
+    color: #161616;
+    text-decoration: none;
+    display: flex;
+    justify-self: center;
+}
+
+.button2 {
+    background-color: #2c312dc0;
+    border-radius: 13px;
+    border: 2px solid #284d2cd0;
+    display: inline-block;
+    cursor: pointer;
+    color: #ffffff;
+    font-family: lucida handwriting, cursive;
+    font-size: 14px;
+    padding: 6px 16px;
+    text-decoration: none;
+    width: 130px;
+}
+
+.button2:hover {
+    background-color: #222e1c;
+}
+
+.button2:active {
+    position: relative;
+    top: 1px;
+}
+
+.button2-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    justify-content: space-evenly;
+}
+
+.button3-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    justify-content: space-evenly;
+}
+
+.button3 {
+    background-color: #2c4b34c0;
+    border-radius: 13px;
+    border: 2px solid #48614bd0;
+    display: inline-block;
+    cursor: pointer;
+    color: #eeeeee;
+    font-family: lucida handwriting, cursive;
+    font-size: 14px;
+    padding: 6px 16px;
+    text-decoration: none;
+    width: 80px;
+    height: 50px;
+}
+
+.button3:hover {
+    background-color: #3d3d3d;
+}
+
+.button3:active {
+    position: relative;
+    top: 1px;
+}
+
+/*addgoal*/
+.choosecategory {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    border-radius: 13px;
+}
+
+.button4 {
+    box-shadow: 2px -1px 11px 0px #2f6620;
+    background: linear-gradient(to bottom, #568f5e 5%, #597a47 100%);
+    background-color: #568f5e;
+    border-radius: 42px;
+    border: 2px solid #2f7a37;
+    display: inline-block;
+    cursor: pointer;
+    color: #f7f7f7;
+    font-family: lucida handwriting, cursive;
+    font-size: 24px;
+    padding: 11px 40px;
+    text-decoration: none;
+    text-shadow: 0px 0px 3px #c5c7c5;
+}
+
+#categoryOutput {
+    font-size: 24px;
+    color: #333;
+    font-family: lucida handwriting, cursive;
+    border: 2px solid #ccc;
+    border-radius: 20px;
+    padding: 15px;
+    background-color: #dddcdc;
+}
+
+.newgoaltitle {
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+    background-color: rgb(248, 248, 248);
+    font-family: Trebuchet MS;
+    border-radius: 80px;
+    font-family: lucida handwriting, cursive;
+}
+
+.newgoal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.toggle-btn2.active {
+    background-color: #568f5e;
+    color: #e9e9e9;
+    border: 1px solid #d15c5caf;
+    box-shadow: 0 0 12px 2px #356130, 0 0 4px 1px #0d4b11 inset;
+    transition: box-shadow 0.2s, background 0.2s;
+    font-family: lucida handwriting, cursive;
+}
+
+.toggle-btn2 {
+    background-color: #525352;
+    border-radius: 20px;
+    border: 1px solid #18ab29;
+    display: inline-block;
+    cursor: pointer;
+    color: #e9e9e9;
+    font-size: 16px;
+    padding: 16px 19px;
+    text-decoration: none;
+    font-family: lucida handwriting, cursive;
+}
+
+.toggle-btn2:hover {
+    background-color: #203d1198;
+}
+
+.padding {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+    background-color: rgb(248, 248, 248);
+    border-radius: 80px;
+    font-family: lucida handwriting, cursive;
+    box-sizing: border-box;
+}
+
+.text {
+    padding: 24px;
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.goal-box {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    background-color: #e0ffe0;
+    /* Standardfarbe für Public */
+}
+
+.goal-box.goal-private {
+    background-color: #d3d3d3;
+    /* Grau für Private */
+}
+
+/*owngoals.html*/
+.goal-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f4f4f4;
+    border: 2px solid #bbb;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-family: lucida handwriting, cursive;
+    font-size: 22px;
+    transition: background-color 0.3s ease;
+}
+
+.goal-text {
+    margin-right: 16px;
+    word-break: break-word;
+}
+
+.goal-public {
+    background-color: #ececec;
+}
+
+.goal-private {
+    background-color: #a8a8a8;
+}
+
+.goal-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.edit-btn,
+.remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #c0392b;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.edit-btn:hover,
+.remove-btn:hover,
+#editBtn:hover {
+    transform: scale(1.2);
+}
+
+.edit-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgb(111, 179, 90) 0%, rgb(178, 216, 173) 100%);
+    border: 2px solid #8f8989;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.39);
+    border-radius: 20px;
+    min-width: 200px;
+    min-height: 360px;
+}
+
+#centerbuttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.tick-btn {
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.8s;
+}
+
+.tick-btn:hover {
+    transform: scale(1.2);
+}
+
+
+
+
+.goal-category {
+  display: inline-block;     /* oder block/flex, wichtig für overflow */
+  max-width: 200px;          /* ⬅️ hier anpassen: maximale Breite */
+  white-space: nowrap;       /* kein Zeilenumbruch */
+  overflow: hidden;          /* überschüssiger Text ausblenden */
+  text-overflow: ellipsis;   /* "..." am Ende anzeigen */
+}
+.goal-title {
+  display: inline-block;     /* oder block/flex, wichtig für overflow */
+  max-width: 200px;          /* ⬅️ hier anpassen: maximale Breite */
+  white-space: nowrap;       /* kein Zeilenumbruch */
+  overflow: hidden;          /* überschüssiger Text ausblenden */
+  text-overflow: ellipsis;   /* "..." am Ende anzeigen */
+}
+
+/* aahome.html*/
+/* Grundlegendes Styling für den Range-Slider */
+input[type="range"] {
+  -webkit-appearance: none; /* Für Webkit-Browser (Chrome, Safari) */
+  appearance: none; /* Für Standard-Browser */
+  background: transparent;
+  cursor: pointer;
+  width: 330px; /* Oder eine andere gewünschte Breite */
+}
+
+/* Styling für den Track (Laufbereich) */
+/* Die zweifarbige Darstellung wird über JavaScript gesteuert */
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: transparent;
+  height: 8px;
+  border-radius: 4px;
+}
+input[type="range"]::-moz-range-track {
+  background-color: transparent;
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* Styling für den Thumb (Schieber) */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  background-color: transparent;
+  border-radius: 40%;
+  margin-top: -6px; /* Zentriert den Thumb vertikal auf dem Track */
+}
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  height: 20px;
+  width: 20px;
+  background-color: transparent;
+  border-radius: 50%;
+}
+
+
+
+
+.level-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.level-container span {
+    font-weight: bold;
+    color: #7b2e9c;
+    min-width: 25px;
+    text-align: center;
+}
+
+.picture {
+    width: 45px;
+    margin-top: 20px;
+}

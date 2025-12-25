@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-Up</title>
+    <link rel="stylesheet" href="../home/style.css">
+</head>
+
+<body>
+
+    <form action="sign-up.php" method="post" class="form" style="gap: 0px;">
+        <!--kein plan ob mit sign-up.php oder nicht. ist für backend-->
+
+
+        <h2>Welcome to <br>
+            <div class="bucked">Bucked</div>
+        </h2><br>
+        <div class="logintext">Sign-Up</div><br>
+        <input type="email" id="email" placeholder="Email..." required><p></p>
+        <input type="password" id="password" placeholder="Password..." required><p></p>
+        <input type="date" placeholder="Year of Birth..." required max="2012-07-31" min="1935-07-31" id="age" ><br>
+        <p></p>
+        <button type="button" id="signupBtn" class="button_login">Sign-Up</button>
+        Already have an Account?<div><a href="login.html">Login</a></div>
+        <div><a href="info.html" style="text-decoration: none;">Reason for data backup?</a></div>
+
+    </form>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  setPersistence, 
+  browserLocalPersistence, 
+  sendEmailVerification 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  increment 
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDahPBRsjOGgalkR3raXagtKytGn9n1SdE",
+  authDomain: "bucked.firebaseapp.com",
+  projectId: "bucked",
+  storageBucket: "bucked.firebasestorage.app",
+  messagingSenderId: "83783824498",
+  appId: "1:83783824498:web:da41e3e5dfbe131441beeb",
+  measurementId: "G-F3VYK204YW"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const analytics = getAnalytics(app);
+
+window.auth = auth;
+window.db = db;
+
+document.getElementById("signupBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const age = document.getElementById("age").value;
+if (age === "") {
+    alert("Please enter your date of birth.");
+  } else {
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 🔹 Counter-Dokument referenzieren
+    const counterRef = doc(db, "counters", "userCounter");
+
+    let newNumber = 2000;
+    const counterSnap = await getDoc(counterRef);
+
+    if (counterSnap.exists()) {
+      newNumber = counterSnap.data().count + 1;
+      await updateDoc(counterRef, { count: increment(1) });
+    } else {
+      await setDoc(counterRef, { count: 2000 });
+    }
+
+    const username = "User" + newNumber;
+
+    // 🔹 User-Daten speichern
+    await setDoc(doc(db, "users", user.uid), {
+      username: username,
+      email: user.email,
+      createdAt: new Date(),
+      birthday: age//ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+    });
+
+    // 🔹 Verifizierungs-Mail senden
+    await sendEmailVerification(user);
+    alert("Account erstellt! Bitte bestätige deine E-Mail-Adresse.");
+
+    console.log("Signed up as:", username, user.email);
+
+    // Weiterleiten
+    window.location.href = "../home/aahome.html";
+
+  } catch (err) {
+    alert("Fehler: " + err.message);
+  } 
+  
+}});
+</script>
+
+
+</body>
+
+</html>
